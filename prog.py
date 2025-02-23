@@ -1,4 +1,4 @@
-import pystray, array, math, pyaudio, threading
+import pystray, array, math, pyaudio, threading, os
 
 from PIL import Image, ImageDraw
 from pystray import Menu as menu, MenuItem as item
@@ -56,10 +56,16 @@ def create_image(width, height, color1):
 def destroy_all():
     global output_enabled
     output_enabled = False
+    os.remove("lockfile")
     icon.stop()
 
 
 def main():
+    # Simple check if the process is already running
+    if os.path.exists("lockfile"):
+        return
+    else:
+        open("lockfile", 'a').close()
 
     def set_state_freq(v):
         def inner(icon, item):
@@ -88,7 +94,8 @@ def main():
         item(
             'Enable keepalive output',
             on_clicked,
-            checked=lambda item: output_enabled),
+            checked=lambda item: output_enabled,
+            default=True),
         item(
             'Frequency',
             menu(
